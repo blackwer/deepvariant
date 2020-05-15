@@ -83,7 +83,7 @@ function fix_zip_file {
   # file, it will uncompress and run the __main__.py.  This is the trick that
   # bazel uses to make a self-executable zip, see for example
   # https://github.com/bazelbuild/bazel/blob/558b717e906156477b1c6bd29d049a0fb8e18b27/src/main/java/com/google/devtools/build/lib/bazel/rules/python/BazelPythonSemantics.java#L193
-  echo '#!/usr/bin/env python' | cat - "${ZIP_OUT}" > "${SELF_ZIP}"
+  echo '#!/usr/bin/env python3' | cat - "${ZIP_OUT}" > "${SELF_ZIP}"
 
   # Step 7: Copy it back and make it executable.
   popd > /dev/null

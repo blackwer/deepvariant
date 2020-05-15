@@ -42,14 +42,6 @@ note_build_stage "Install the runtime packages"
 
 ./run-prereq.sh
 
-note_build_stage "Update package list"
-
-sudo -H apt-get -qq -y update
-
-note_build_stage "Install development packages"
-
-sudo -H apt-get -qq -y install pkg-config zip g++ zlib1g-dev unzip curl git lsb-release > /dev/null
-
 ################################################################################
 # bazel
 ################################################################################
@@ -87,31 +79,34 @@ note_build_stage "Install CLIF binary"
 if [[ -e /usr/local/clif/bin/pyclif ]];
 then
   echo "CLIF already installed."
-else
-  # Figure out which linux installation we are on to fetch an appropriate
-  # version of the pre-built CLIF binary. Note that we only support now Ubuntu
-  # 14, 16, and 18.
-  case "$(lsb_release -d)" in
-    *Ubuntu*18.*.*) export DV_PLATFORM="ubuntu-18" ;;
-    *Ubuntu*16.*.*) export DV_PLATFORM="ubuntu-16" ;;
-    *Ubuntu*14.*.*) export DV_PLATFORM="ubuntu-14" ;;
-    *Debian*9.*)    export DV_PLATFORM="debian" ;;
-    *Debian*rodete) export DV_PLATFORM="debian" ;;
-    *) echo "CLIF is not installed on this machine and a prebuilt binary is not
-available for this platform. Please install CLIF at
-https://github.com/google/clif before continuing."
-    exit 1
-  esac
+# else
+#   # Figure out which linux installation we are on to fetch an appropriate
+#   # version of the pre-built CLIF binary. Note that we only support now Ubuntu
+#   # 14, 16, and 18.
+#   case "$(lsb_release -d)" in
+#     *Ubuntu*18.*.*) export DV_PLATFORM="ubuntu-18" ;;
+#     *Ubuntu*16.*.*) export DV_PLATFORM="ubuntu-16" ;;
+#     *Ubuntu*14.*.*) export DV_PLATFORM="ubuntu-14" ;;
+#     *Debian*9.*)    export DV_PLATFORM="debian" ;;
+#     *Debian*rodete) export DV_PLATFORM="debian" ;;
+#     *) echo "CLIF is not installed on this machine and a prebuilt binary is not
+# available for this platform. Please install CLIF at
+# https://github.com/google/clif before continuing."
+#     exit 1
+#   esac
 
-  OSS_CLIF_CURL_ROOT="${DV_PACKAGE_CURL_PATH}/oss_clif_py3"
-  OSS_CLIF_PKG="oss_clif.${DV_PLATFORM}.latest.tgz"
+  # DV_PLATFORM=ubuntu-16
 
-  if [[ ! -f "/tmp/${OSS_CLIF_PKG}" ]]; then
-    curl "${OSS_CLIF_CURL_ROOT}/${OSS_CLIF_PKG}" > /tmp/${OSS_CLIF_PKG}
-  fi
+  # OSS_CLIF_CURL_ROOT="${DV_PACKAGE_CURL_PATH}/oss_clif_py3"
+  # OSS_CLIF_PKG="oss_clif.${DV_PLATFORM}.latest.tgz"
 
-  (cd / && sudo tar xzf "/tmp/${OSS_CLIF_PKG}")
-  sudo ldconfig  # Reload shared libraries.
+  # if [[ ! -f "/tmp/${OSS_CLIF_PKG}" ]]; then
+  #   curl "${OSS_CLIF_CURL_ROOT}/${OSS_CLIF_PKG}" > /tmp/${OSS_CLIF_PKG}
+  # fi
+
+  # (cd / && sudo tar xzf "/tmp/${OSS_CLIF_PKG}")
+    # sudo ldconfig  # Reload shared libraries.
+
 fi
 
 ################################################################################
@@ -125,8 +120,6 @@ if [[ ! -d ../tensorflow ]]; then
   (cd .. && git clone https://github.com/tensorflow/tensorflow)
 fi
 
-export PYTHON_BIN_PATH=$(which python3.6)
-export PYTHON_LIB_PATH='/usr/local/lib/python3.6/dist-packages'
 (cd ../tensorflow &&
  git checkout "${DV_CPP_TENSORFLOW_TAG}" &&
  echo | ./configure)

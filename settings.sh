@@ -101,7 +101,7 @@ export DV_INSTALL_GPU_DRIVERS="${DV_INSTALL_GPU_DRIVERS:-0}"
 export PYTHON_BIN_PATH=$(which python3.6)
 export PYTHON_LIB_PATH='/usr/local/lib/python3.6/dist-packages'
 export USE_DEFAULT_PYTHON_LIB_PATH=1
-export DV_COPT_FLAGS="--copt=-march=corei7 --copt=-Wno-sign-compare --copt=-Wno-write-strings"
+export DV_COPT_FLAGS="--copt=-march=native --copt=-Wno-sign-compare --copt=-Wno-write-strings"
 
 function note_build_stage {
   echo "========== [$(date)] Stage '${1}' starting"

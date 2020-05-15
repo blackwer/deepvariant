@@ -45,48 +45,22 @@ source settings.sh
 
 note_build_stage "Misc setup"
 
-if [[ "$EUID" = "0" ]]; then
-  # Ensure sudo exists, even if we don't need it.
-  apt-get -qq -y update > /dev/null
-  apt-get -qq -y install sudo > /dev/null
-  PIP_ARGS=(
-    "-qq")
-else
-  PIP_ARGS=(
-    "--user"
-    "-qq")
-fi
+PIP_ARGS=()
+DV_USE_GCP_OPTIMIZED_TF_WHL=1
 
 note_build_stage "Update package list"
 
-sudo -H apt-get -qq -y update > /dev/null
+sudo -H yum -y update
 
 note_build_stage "Install development packages"
 
-sudo -H apt-get -qq -y install pkg-config zip zlib1g-dev unzip curl lsb-release git > /dev/null
+# sudo -H -get -qq -y install pkg-config zip zlib1g-dev unzip curl lsb-release git > /dev/null
+sudo -H yum -y install pkg-config zip zlib-devel unzip curl git gcc gcc-c++
 
 note_build_stage "Install python3 packaging infrastructure"
 
 # For altair to work, we need Python to be >= 3.5.3.
-# https://github.com/altair-viz/altair/issues/972
-# On Ubuntu 16.04, default is 3.5.2.
-# So, install Python 3.6.
-sudo -H apt-get install -y software-properties-common
-
-# Install Python 3.6.
-# Reference: https://askubuntu.com/a/1069303
-sudo -H add-apt-repository -y ppa:deadsnakes/ppa
-sudo -H apt -y update
-sudo -H apt-get install -y python3.6
-sudo -H apt-get install -y python3.6-dev
-sudo -H apt-get install -y python3.6-venv
-# If we install python3-pip directly, the pip3 version points to:
-#   pip 8.1.1 from /usr/lib/python3/dist-packages (python 3.5)
-# Use the following lines to ensure 3.6.
-curl -o get-pip.py https://bootstrap.pypa.io/get-pip.py
-sudo -H python3.6 get-pip.py
-sudo ln -sf /usr/bin/python3.6 /usr/local/bin/python3
-sudo ln -sf /usr/bin/python3.6 /usr/bin/python
+sudo -H yum -y install python3 python3-devel python3-virtualenv
 
 echo "$(python3 --version)"
 
@@ -99,38 +73,29 @@ echo "$(pip3 --version)"
 
 note_build_stage "Install python3 packages"
 
-pip3 install "${PIP_ARGS[@]}" contextlib2
-pip3 install "${PIP_ARGS[@]}" enum34
-pip3 install "${PIP_ARGS[@]}" 'sortedcontainers==2.1.0'
-pip3 install "${PIP_ARGS[@]}" 'intervaltree==3.0.2'
-pip3 install "${PIP_ARGS[@]}" 'mock>=2.0.0'
-pip3 install "${PIP_ARGS[@]}" 'protobuf==3.8.0'
-pip3 install "${PIP_ARGS[@]}" 'argparse==1.4.0'
-pip3 install "${PIP_ARGS[@]}" git+https://github.com/google-research/tf-slim.git
-
-# Because of an issue with pypi's numpy on Ubuntu 14.04. we need to compile from
-# source. But we know that on 16.04 we don't need to compile from source
-# See https://github.com/tensorflow/tensorflow/issues/6968#issuecomment-279061085
-if [[ "$(lsb_release -d)" == *Ubuntu*16.04.* ]]; then
-  pip3 install "${PIP_ARGS[@]}" 'numpy==1.16' # To match GCP_OPTIMIZED_TF_WHL_FILENAME
-else
-  echo "Installing numpy with -no-binary=:all:. This will take a bit longer."
-  pip3 install "${PIP_ARGS[@]}" --no-binary=:all: 'numpy==1.16' # To match GCP_OPTIMIZED_TF_WHL_FILENAME
-fi
+sudo pip3 install "${PIP_ARGS[@]}" contextlib2
+sudo pip3 install "${PIP_ARGS[@]}" enum34
+sudo pip3 install "${PIP_ARGS[@]}" 'sortedcontainers==2.1.0'
+sudo pip3 install "${PIP_ARGS[@]}" 'intervaltree==3.0.2'
+sudo pip3 install "${PIP_ARGS[@]}" 'mock>=2.0.0'
+sudo pip3 install "${PIP_ARGS[@]}" 'protobuf==3.8.0'
+sudo pip3 install "${PIP_ARGS[@]}" 'argparse==1.4.0'
+sudo pip3 install "${PIP_ARGS[@]}" git+https://github.com/google-research/tf-slim.git
+sudo pip3 install "${PIP_ARGS[@]}" 'numpy==1.16'
 
 # Reason:
 # ========== [Wed Dec 11 19:57:32 UTC 2019] Stage 'Install python3 packages' starting
 # ERROR: pyasn1-modules 0.2.7 has requirement pyasn1<0.5.0,>=0.4.6, but you'll have pyasn1 0.1.9 which is incompatible.
-pip3 install "${PIP_ARGS[@]}" 'pyasn1<0.5.0,>=0.4.6'
-pip3 install "${PIP_ARGS[@]}" 'requests>=2.18'
-pip3 install "${PIP_ARGS[@]}" 'oauth2client>=4.0.0'
-pip3 install "${PIP_ARGS[@]}" 'crcmod>=1.7'
-pip3 install "${PIP_ARGS[@]}" 'six>=1.11.0'
-pip3 install "${PIP_ARGS[@]}" joblib
-pip3 install "${PIP_ARGS[@]}" psutil
-pip3 install "${PIP_ARGS[@]}" --upgrade google-api-python-client
-pip3 install "${PIP_ARGS[@]}" 'pandas==0.24.1'
-pip3 install "${PIP_ARGS[@]}" 'altair==3.3.0'
+sudo pip3 install "${PIP_ARGS[@]}" 'pyasn1<0.5.0,>=0.4.6'
+sudo pip3 install "${PIP_ARGS[@]}" 'requests>=2.18'
+sudo pip3 install "${PIP_ARGS[@]}" 'oauth2client>=4.0.0'
+sudo pip3 install "${PIP_ARGS[@]}" 'crcmod>=1.7'
+sudo pip3 install "${PIP_ARGS[@]}" 'six>=1.11.0'
+sudo pip3 install "${PIP_ARGS[@]}" joblib
+sudo pip3 install "${PIP_ARGS[@]}" psutil
+sudo pip3 install "${PIP_ARGS[@]}" --upgrade google-api-python-client
+sudo pip3 install "${PIP_ARGS[@]}" 'pandas==0.24.1'
+sudo pip3 install "${PIP_ARGS[@]}" 'altair==3.3.0'
 
 
 ################################################################################
@@ -138,7 +103,6 @@ pip3 install "${PIP_ARGS[@]}" 'altair==3.3.0'
 ################################################################################
 
 note_build_stage "Install TensorFlow pip package"
-
 if [[ "${DV_USE_PREINSTALLED_TF}" = "1" ]]; then
   echo "Skipping TensorFlow installation at user request; will use pre-installed TensorFlow."
 else
@@ -153,25 +117,25 @@ else
   if [[ "${DV_TF_NIGHTLY_BUILD}" = "1" ]]; then
     if [[ "${DV_GPU_BUILD}" = "1" ]]; then
       echo "Installing GPU-enabled TensorFlow nightly wheel"
-      pip3 install "${PIP_ARGS[@]}" --upgrade tf_nightly_gpu
+      sudo pip3 install "${PIP_ARGS[@]}" --upgrade tf_nightly_gpu
     else
       echo "Installing CPU-only TensorFlow nightly wheel"
-      pip3 install "${PIP_ARGS[@]}" --upgrade tf_nightly
+      sudo pip3 install "${PIP_ARGS[@]}" --upgrade tf_nightly
     fi
   else
     # Use the official TF release pip package.
     if [[ "${DV_GPU_BUILD}" = "1" ]]; then
       echo "Installing GPU-enabled TensorFlow ${DV_TENSORFLOW_STANDARD_GPU_WHL_VERSION} wheel"
-      pip3 install "${PIP_ARGS[@]}" --upgrade "tensorflow-gpu==${DV_TENSORFLOW_STANDARD_GPU_WHL_VERSION}"
+      sudo pip3 install "${PIP_ARGS[@]}" --upgrade "tensorflow-gpu==${DV_TENSORFLOW_STANDARD_GPU_WHL_VERSION}"
     elif [[ "${DV_USE_GCP_OPTIMIZED_TF_WHL}" = "1" ]]; then
       echo "Installing Intel's CPU-only MKL TensorFlow ${DV_GCP_OPTIMIZED_TF_WHL_VERSION} wheel"
       # redacted
       WHEEL_NAME=tensorflow-2.0.0-cp36-cp36m-linux_x86_64.whl
       curl "https://storage.googleapis.com/penporn-kokoro/tf-mkl-2.0-py36/${WHEEL_NAME}" > "/tmp/${WHEEL_NAME}"
-      pip3 install "${PIP_ARGS[@]}" --upgrade "/tmp/${WHEEL_NAME}"
+      sudo pip3 install "${PIP_ARGS[@]}" --upgrade "/tmp/${WHEEL_NAME}"
     else
       echo "Installing standard CPU-only TensorFlow ${DV_TENSORFLOW_STANDARD_CPU_WHL_VERSION} wheel"
-      pip3 install "${PIP_ARGS[@]}" --upgrade "tensorflow==${DV_TENSORFLOW_STANDARD_CPU_WHL_VERSION}"
+      sudo pip3 install "${PIP_ARGS[@]}" --upgrade "tensorflow==${DV_TENSORFLOW_STANDARD_CPU_WHL_VERSION}"
     fi
   fi
 fi
@@ -181,44 +145,44 @@ fi
 # CUDA
 ################################################################################
 
-if [[ "${DV_GPU_BUILD}" = "1" ]]; then
-  if [[ "${DV_INSTALL_GPU_DRIVERS}" = "1" ]]; then
-    if [[ "$(lsb_release -d)" != *Ubuntu*16.*.* ]]; then
-      echo "CUDA installation only configured for Ubuntu 16"
-      exit 1
-    fi
+# if [[ "${DV_GPU_BUILD}" = "1" ]]; then
+#   if [[ "${DV_INSTALL_GPU_DRIVERS}" = "1" ]]; then
+#     if [[ "$(lsb_release -d)" != *Ubuntu*16.*.* ]]; then
+#       echo "CUDA installation only configured for Ubuntu 16"
+#       exit 1
+#     fi
 
-    # from https://cloud.google.com/compute/docs/gpus/add-gpus
-    echo "Checking for CUDA..."
-    if ! dpkg-query -W cuda-10-0; then
-      echo "Installing CUDA..."
-      CUDA_DEB="cuda-repo-ubuntu1604_10.0.130-1_amd64.deb"
-      curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/${CUDA_DEB}
-      sudo -H apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-      sudo -H dpkg -i "./${CUDA_DEB}"
-      sudo -H apt-get -qq -y update > /dev/null
-      sudo -H apt-get -qq -y install cuda-10-0 > /dev/null
-    fi
-    echo "Checking for CUDNN..."
-    if [[ ! -e /usr/local/cuda-10.0/include/cudnn.h ]]; then
-      echo "Installing CUDNN..."
-      CUDNN_TAR_FILE="cudnn-10.0-linux-x64-v7.6.0.64.tgz"
-      wget -q https://developer.download.nvidia.com/compute/redist/cudnn/v7.6.0/${CUDNN_TAR_FILE}
-      tar -xzvf ${CUDNN_TAR_FILE}
-      sudo cp -P cuda/include/cudnn.h /usr/local/cuda-10.0/include
-      sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-10.0/lib64/
-      sudo chmod a+r /usr/local/cuda-10.0/lib64/libcudnn*
-      sudo ldconfig
-    fi
+#     # from https://cloud.google.com/compute/docs/gpus/add-gpus
+#     echo "Checking for CUDA..."
+#     if ! dpkg-query -W cuda-10-0; then
+#       echo "Installing CUDA..."
+#       CUDA_DEB="cuda-repo-ubuntu1604_10.0.130-1_amd64.deb"
+#       curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/${CUDA_DEB}
+#       sudo -H apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+#       sudo -H dpkg -i "./${CUDA_DEB}"
+#       sudo -H apt-get -qq -y update > /dev/null
+#       sudo -H apt-get -qq -y install cuda-10-0 > /dev/null
+#     fi
+#     echo "Checking for CUDNN..."
+#     if [[ ! -e /usr/local/cuda-10.0/include/cudnn.h ]]; then
+#       echo "Installing CUDNN..."
+#       CUDNN_TAR_FILE="cudnn-10.0-linux-x64-v7.6.0.64.tgz"
+#       wget -q https://developer.download.nvidia.com/compute/redist/cudnn/v7.6.0/${CUDNN_TAR_FILE}
+#       tar -xzvf ${CUDNN_TAR_FILE}
+#       sudo cp -P cuda/include/cudnn.h /usr/local/cuda-10.0/include
+#       sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-10.0/lib64/
+#       sudo chmod a+r /usr/local/cuda-10.0/lib64/libcudnn*
+#       sudo ldconfig
+#     fi
 
-    # Tensorflow says to do this.
-    sudo -H apt-get -qq -y install libcupti-dev > /dev/null
-  fi
+#     # Tensorflow says to do this.
+#     sudo -H apt-get -qq -y install libcupti-dev > /dev/null
+#   fi
 
-  # If we are doing a gpu-build, nvidia-smi should be install. Run it so we
-  # can see what gpu is installed.
-  nvidia-smi || :
-fi
+#   # If we are doing a gpu-build, nvidia-smi should be install. Run it so we
+#   # can see what gpu is installed.
+#   nvidia-smi || :
+# fi
 
 
 ################################################################################
@@ -228,9 +192,10 @@ fi
 note_build_stage "Install other packages"
 
 # for htslib
-sudo -H apt-get -qq -y install libssl-dev libcurl4-openssl-dev liblz-dev libbz2-dev liblzma-dev > /dev/null
+sudo -H yum -y install openssl-devel libcurl-devel lz4-devel bzip2-devel xz-devel
 
 # for the debruijn graph
-sudo -H apt-get -qq -y install libboost-graph-dev > /dev/null
+# ubuntu was libboost-graph-dev, but there is no devel equivalent on centos8
+sudo yum install -y boost-devel
 
 note_build_stage "run-prereq.sh complete"

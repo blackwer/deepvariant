@@ -51,10 +51,10 @@ function setup_test() {
   # There are some extra programs we will need.
   # We are going to use [GNU Parallel](https://www.gnu.org/software/parallel/) to
   # run `make_examples`.
-  sudo apt-get -y update
-  sudo apt-get -y install parallel
-  sudo apt-get -y install docker.io
-  sudo apt-get -y install aria2
+  # sudo apt-get -y update
+  # sudo apt-get -y install parallel
+  # sudo apt-get -y install docker.io
+  # sudo apt-get -y install aria2
 
   ## Download models, and test data
   # Copy the model files to your local disk.
@@ -183,7 +183,7 @@ function main() {
   local -r model_http_dir="${1:-$DEFAULT_MODEL_HTTP_DIR}"
   echo "Using model from: ${model_http_dir}"
 
-  build_binaries
+  # build_binaries
   setup_test
   (time run_make_examples) 2>&1 | tee "${LOG_DIR}/make_examples.log"
   (time run_call_variants) 2>&1 | tee "${LOG_DIR}/call_variants.log"
